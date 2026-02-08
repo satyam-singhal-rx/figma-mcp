@@ -1,0 +1,4 @@
+node_modules/
+.env
+frame.json
+frame.reduced.json
