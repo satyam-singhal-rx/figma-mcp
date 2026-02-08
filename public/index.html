@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma Frame Reducer</title>
+  <style>
+    :root {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-input: #ffffff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #6c757d;
+      --border-color: #e1e5eb;
+      --accent: #a259ff;
+      --accent-hover: #8b3dff;
+      --error-bg: #fff0f0;
+      --error-border: #ffccd5;
+      --error-text: #dc3545;
+      --code-bg: #1a1a2e;
+      --code-text: #e9ecef;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #0d0d14;
+        --bg-secondary: #1a1a2e;
+        --bg-input: #252540;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --border-color: #3d3d5c;
+        --accent: #a259ff;
+        --accent-hover: #b87aff;
+        --error-bg: #2d1f1f;
+        --error-border: #5c2a2a;
+        --error-text: #ff6b7a;
+        --code-bg: #12121c;
+        --code-text: #e9ecef;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .logo svg {
+      width: 40px;
+      height: 40px;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+    input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(162, 89, 255, 0.15);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-primary:disabled { background: var(--text-secondary); cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.625rem 1rem;
+      font-size: 0.85rem;
+    }
+    .btn-secondary:hover { background: var(--border-color); }
+    .result-container {
+      margin-top: 1.5rem;
+      display: none;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .result-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .btn-group { display: flex; gap: 0.5rem; }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .help {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      font-size: 0.875rem;
+    }
+    .help h4 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    .help ol {
+      padding-left: 1.25rem;
+      color: var(--text-secondary);
+    }
+    .help li { margin-bottom: 0.5rem; line-height: 1.5; }
+    .help code {
+      background: var(--bg-input);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#gradient)"/>
+          <path d="M12 28V12h8c2.2 0 4 1.8 4 4s-1.8 4-4 4h-8m8 0c2.2 0 4 1.8 4 4s-1.8 4-4 4h-8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="28" cy="12" r="3" fill="white"/>
+          <defs>
+            <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a259ff"/>
+              <stop offset="1" stop-color="#6c3bd4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <h1>Figma Frame Reducer</h1>
+      </div>
+      <p class="subtitle">Extract essential layout and style properties from any Figma frame</p>
+    </header>
+
+    <div class="card">
+      <form id="form">
+        <div class="form-group">
+          <label for="figmaUrl">Figma Frame URL</label>
+          <input type="url" id="figmaUrl" placeholder="https://www.figma.com/design/xxxxx/File-Name?node-id=123-456" required>
+        </div>
+        <div class="form-group">
+          <label for="token">Figma Personal Access Token</label>
+          <input type="password" id="token" placeholder="figd_xxxxxx" required>
+        </div>
+        <button type="submit" id="submitBtn" class="btn btn-primary">Get Reduced JSON</button>
+      </form>
+
+      <div id="error" class="error" style="display: none;"></div>
+
+      <div id="resultContainer" class="result-container">
+        <div class="result-header">
+          <h3>Reduced JSON</h3>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="copyResult()">Copy</button>
+            <button class="btn btn-secondary" onclick="downloadResult()">Download</button>
+          </div>
+        </div>
+        <pre id="result"></pre>
+      </div>
+    </div>
+
+    <div class="help">
+      <h4>How to use</h4>
+      <ol>
+        <li>Open your Figma file and right-click the frame you want to extract</li>
+        <li>Click "Copy link" - the URL should contain <code>node-id=xxx-xxx</code></li>
+        <li>Get your token from Figma Settings &rarr; Account &rarr; Personal access tokens</li>
+        <li>Paste both values above and click "Get Reduced JSON"</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const submitBtn = document.getElementById("submitBtn");
+    const errorDiv = document.getElementById("error");
+    const resultContainer = document.getElementById("resultContainer");
+    const resultPre = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const figmaUrl = document.getElementById("figmaUrl").value;
+      const token = document.getElementById("token").value;
+
+      errorDiv.style.display = "none";
+      resultContainer.style.display = "none";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Loading...";
+
+      try {
+        const res = await fetch("/api/reduce", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ figmaUrl, token }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+
+        resultPre.textContent = JSON.stringify(data, null, 2);
+        resultContainer.style.display = "block";
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.style.display = "block";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Get Reduced JSON";
+      }
+    });
+
+    function copyResult() {
+      navigator.clipboard.writeText(resultPre.textContent);
+      event.target.textContent = "Copied!";
+      setTimeout(() => event.target.textContent = "Copy to Clipboard", 2000);
+    }
+
+    function downloadResult() {
+      const blob = new Blob([resultPre.textContent], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "figma-frame.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
